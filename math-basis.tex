@@ -1,15 +1,44 @@
 \text {All formulas are only valid given “n” and “N” are integers and 0<nN. “N” is the total number of satellites, “a” is the acceleration provided by gravity, “R” is the radius of orbit, “t” is the current time and “n” is the current satellite.}
 
-S_1(t,n)  = \left[ R \space , { \pi \over 2 } \space , { 2 \cdot n \cdot pi \over N } + { \pi \over 2 } - t \cdot \sqrt { a \over R } \right] 
-\\ 
-C_1(t,n) = \left[ 0 , R \cdot cos \left( t \cdot \sqrt{a/R} + {2 \cdot n \cdot \pi \over N} \right) , R \cdot \sin \left( t \cdot \sqrt{a/R} + {2 \cdot n \cdot \pi \over N} \right) \right]
-\\
+S_1(t,n)  = \left[ 
+R \space , \space 
+{ \pi \over 2 } \space , \space 
+{ 2 \cdot n \cdot \pi \over N } + { \pi \over 2 } - t \cdot \sqrt { a \over R } \right] 
+\\ \space \\
 
-\centerline{S_2(t,n)=n<N/2[]  n>N/2[]}
-\\
+C_1(t,n) = \left[ 
+0 \space , \space  
+R \cdot \cos \left( t \cdot \sqrt{a \over R} + {2 \cdot n \cdot \pi \over N} \right) \space, \space 
+R \cdot \sin \left( t \cdot \sqrt{a \over R} + {2 \cdot n \cdot \pi \over N} \right) \right]
+\\ \space \\
 
-\centerline{C_2(t,n)=n<N/2[]  n>N/2[]}
-\\
+S_2(t,n)= \left\{ \begin{array}{11} 
+n<{N \over 2} &  
+\left[ 
+R \space , \space 
+{\pi \over 2} \space, \space 
+t \cdot \sqrt{a \over R} + {\pi \cdot (4 \cdot n + 2) \over N} \right] \\  
+n>{N \over 2} &  
+\left[ 
+R \space , \space 
+t \cdot \sqrt{a \over R} + {4 \cdot \pi \over N} \cdot \left( n - {N \over 2} \right) \space , \space
+0 \right] \\
+ \end{array} \right.
+\\ \space \\
+
+C_2(t,n)=\left\{ \begin{array}{11} 
+n<{N \over 2} & 
+\left[ 
+0 \space , \space 
+R \cdot \cos \left( t \cdot \sqrt{a \over R} + {\pi \cdot (4 \cdot n + 2) \over N} \right) \space , \space 
+R \cdot \sin \left( t \cdot \sqrt{a \over R} + {\pi \cdot (4 \cdot n + 2) \over N} \right) \right] \\ 
+n>{N \over 2} & 
+\left[ 
+R \cdot \cos \left( t \cdot \sqrt{a \over R} + {\pi \cdot (4 \cdot n + 2) \over N} \right) \space , \space 
+0 \space , \space 
+R \cdot \sin \left( t \cdot \sqrt{a \over R} + {\pi \cdot (4 \cdot n + 2) \over N} \right) \right] \\
+ \end{array} \right.
+\\ \space \\
 
 \centerline{S_3(t,n)=n<N/3[]  2*N/3>n>N/3[]  n>2*N/3[]}
 \\
