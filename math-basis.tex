@@ -41,9 +41,13 @@ R \cdot \cos \left( t \cdot \sqrt{a \over R} + {\pi \cdot (4 \cdot n + 2) \over 
 R \cdot \sin \left( t \cdot \sqrt{a \over R} + {\pi \cdot (4 \cdot n + 2) \over N} \right) \right] \\ 
 n>{N \over 2} & 
 \left[ 
-R \cdot \cos \left( t \cdot \sqrt{a \over R} + {\pi \cdot (4 \cdot n + 2) \over N} \right) \space , \space 
+R \cdot \cos \left( t \cdot \sqrt{a \over R} + {4 \cdot \pi \over N} \cdot \left(n - {N \over 2} \right)  
+
+\right) \space , \space 
 0 \space , \space 
-R \cdot \sin \left( t \cdot \sqrt{a \over R} + {\pi \cdot (4 \cdot n + 2) \over N} \right) \right] \\
+R \cdot \sin \left( t \cdot \sqrt{a \over R} + {4 \cdot \pi \over N} \cdot \left(n - {N \over 2} \right)  
+
+\right) \right] \\
  \end{array} \right.
 \\ \space \\
 
@@ -56,14 +60,16 @@ t \cdot \sqrt { a \over R } + {\pi \cdot \left( 6 \cdot n + 2 \right) \over N } 
 {2 \cdot N \over 3}>n>{N \over 3} & 
 \left[ 
 R \space , \space
- \space , \space
+t \cdot \sqrt { a \over R } + {6 \cdot \pi \over N} \cdot \left( n - {N \over 3} \right) + \pi \space , 
+
+\space
 0
 \right] \\ 
 n>{2 \cdot N \over 3} & 
 \left[ 
 R \space , \space
 {\pi \over 2} \space , \space
-
+t \cdot \sqrt { a \over R } + {6 \cdot \pi \over N} \cdot \left( n - {2 \cdot N \over 3} \right)
 \right] \\
  \end{array} \right.
 \\ \space \\
@@ -76,20 +82,20 @@ R \cdot \cos \left( t \cdot \sqrt{ a \over R} + {\pi \cdot (6 \cdot n + 2) \over
 R \cdot \sin \left( t \cdot \sqrt{ a \over R} + {\pi \cdot (6 \cdot n + 2) \over N} \right) \right] \\ 
 {2 \cdot N \over 3}>n>{N \over 3} & 
 \left[ 
-R \cdot \cos \left( t \cdot \sqrt{ a \over R} +  {6 \cdot \pi \over N} \cdot \left( n - N \over 3 \right) 
+R \cdot \cos \left( t \cdot \sqrt{ a \over R} +  {6 \cdot \pi \over N} \cdot \left( n - {N \over 3} \right) + 
 
-\right) \space , \space
+\pi \right) \space , \space
 0 \space , \space
-R \cdot \sin \left( t \cdot \sqrt{ a \over R} +  {6 \cdot \pi \over N} \cdot \left( n - N \over 3 \right) 
+R \cdot \sin \left( t \cdot \sqrt{ a \over R} +  {6 \cdot \pi \over N} \cdot \left( n - {N \over 3} \right) + 
 
-\right) \right] \\ 
+\pi \right) \right] \\ 
 n>{2 \cdot N \over 3} & 
 \left[ 
-R \cdot \cos \left( t \cdot \sqrt{ a \over R} + {6 \cdot \pi \over N} \cdot \left( n - N \over 3 \right) + 
+R \cdot \cos \left( t \cdot \sqrt{ a \over R} + {6 \cdot \pi \over N} \cdot \left( n - {N \cdot 2 \over 3} 
 
-\pi \right) \space , \space
-R \cdot \sin \left( t \cdot \sqrt{ a \over R} + {6 \cdot \pi \over N} \cdot \left( n - N \over 3 \right) + 
+\right) \right) \space , \space
+R \cdot \sin \left( t \cdot \sqrt{ a \over R} + {6 \cdot \pi \over N} \cdot \left( n - {N \cdot 2 \over 3} 
 
-\pi \right) \space , \space
+\right) \right) \space , \space
 0 \right] \\ 
  \end{array} \right.
