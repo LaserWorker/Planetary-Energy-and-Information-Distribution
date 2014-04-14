@@ -10,19 +10,12 @@ Considering configurations of distributed craft orbiting a center of gravitation
 
 ##Established Geometric positioning of satellites
 
+All formulas are only valid given “n” and “N” are integers and 0<nN. “N” is the total number of satellites, “a” is the acceleration provided by gravity, “R” is the radius of orbit, “t” is the current time and “n” is the current satellite.
+
+
+$ S_1(t,n) = \left[ R \space , \space { \pi \over 2 } \space , \space { 2 \cdot n \cdot \pi \over N } + { \pi \over 2 } - t \cdot \sqrt { a \over R } \right] \\ \space \\ $
 
 $$
-
-
-\text {All formulas are only valid given “n” and “N” are integers and 0<nN. “N” is the total number of satellites, “a” is the acceleration provided by gravity, “R” is the radius of orbit, “t” is the current time and “n” is the current satellite.}
-\\ \space \\
-
-S_1(t,n) = \left[
-R \space , \space
-{ \pi \over 2 } \space , \space
-{ 2 \cdot n \cdot \pi \over N } + { \pi \over 2 } - t \cdot \sqrt { a \over R } \right]
-\\ \space \\
-
 C_1(t,n) = \left[
 0 \space , \space
 R \cdot \cos \left( t \cdot \sqrt{a \over R} + {2 \cdot n \cdot \pi \over N} \right) \space, \space
