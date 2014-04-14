@@ -12,7 +12,7 @@ Considering configurations of distributed craft orbiting a center of gravitation
 
 All formulas are only valid given “n” and “N” are integers and 0<nN. “N” is the total number of satellites, “a” is the acceleration provided by gravity, “R” is the radius of orbit, “t” is the current time and “n” is the current satellite.
 
-
+![equation](http://www.sciweavers.org/tex2img.php?eq=1%2Bsin%28mc%5E2%29%0D%0A&bc=White&fc=Black&im=jpg&fs=12&ff=arev&edit=0)
 $latex S_1(t,n) = \left[ R \space , \space { \pi \over 2 } \space , \space { 2 \cdot n \cdot \pi \over N } + { \pi \over 2 } - t \cdot \sqrt { a \over R } \right] \\ \space \\ $
 
 $$latex
