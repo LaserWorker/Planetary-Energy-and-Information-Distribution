@@ -21,8 +21,11 @@ PlanetRadius=1/PlanetRadius
 #This is the number of identical objects (mini-sats.)
 n = 12          #located in different places
 s = 1/50        #size of object
-GN = ["SatA","SatB","SatC","SatD","SatE","SatF","SatG","SatH","SatI","SatJ","SatK","SatL","SatM","SatN","SatO","SatP","SatQ","SatR","SatS","SatT","SatU","SatV","SatW","SatX","SatY"]
 
+GN = ["SatA","SatB","SatC","SatD","SatE","SatF","SatG","SatH","SatI",
+    "SatJ","SatK","SatL","SatM","SatN","SatO","SatP","SatQ","SatR",
+    "SatS","SatT","SatU","SatV","SatW","SatX","SatY"]
+    
 time = 100      #Number of seconds total
 nocp = 10       #number of calculated positons
 start = 1       #system frame start point
