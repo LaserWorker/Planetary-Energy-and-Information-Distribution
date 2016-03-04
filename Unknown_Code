@@ -1,0 +1,506 @@
+
+import bpy, math, csv, codecs
+from bpy.props import FloatProperty,EnumProperty,BoolProperty
+import math
+from mathutils import Vector
+from functools import reduce
+from bpy_extras.object_utils import object_data_add
+#End of header - Start Data(CSV) transfer script 
+#############################################################
+        
+#This will be used to scale down any input data.
+PlanetRadius=1
+PlanetRadius=1/PlanetRadius
+
+#This is the number of identical objects (mini-sats.)
+n = 18          #located in different places
+s = 1/100        #size of object
+GN = ["SatA","SatB","SatC","SatD","SatE","SatF","SatG",
+    "SatH","SatI","SatJ","SatK","SatL","SatM","SatN","SatO",
+    "SatP","SatQ","SatR","SatS","SatT","SatU","SatV","SatW",
+    "SatX","SatY"]
+
+time = 100      #Number of seconds total
+nocp = 10       #number of calculated positons
+start = 1       #system frame start point
+fps=20          #frames per second
+
+R = 2           #Radius of Orbit
+Dst=12          #Distance of mother ship
+
+#The x,y,z position to be hit by the laser
+hx = 0-math.sqrt(PlanetRadius*PlanetRadius/6)
+hy = 0-math.sqrt(PlanetRadius*PlanetRadius/6)
+hz = 0-math.sqrt(PlanetRadius*PlanetRadius/6)
+
+#---prepare a scene----------------------------------------------
+end=time*fps         #position of last datapoint
+frame_range=range(start,end)      #range of values for frames
+bpy.context.scene.frame_start = start
+bpy.context.scene.frame_end = end #Total number of frames set
+#---------------------------------------------------------------- 
+
+#---add new Textures--------------------------------------------- 
+cTex = bpy.data.textures.new('CloudText', type = 'CLOUDS')
+cTex.noise_scale = 1.0
+cTex.noise_depth = 5
+vTex = bpy.data.textures.new('DestorText', 
+    type = 'DISTORTED_NOISE')
+vTex.noise_scale = 0.2
+#---New materials------------------------------------------------ 
+#The line for orbital drawing
+line = bpy.data.materials.new('Line')
+line.type = 'WIRE'
+#color Red
+red = bpy.data.materials.new('Red')
+red.diffuse_color = (0.2,0,0)
+#color Blue
+blue = bpy.data.materials.new('Blue')
+blue.diffuse_color = (0.5,0.5,0.5)
+#color Green
+green = bpy.data.materials.new('Green')
+green.diffuse_color = (0,0.5,.05)
+#color Grey
+grey= bpy.data.materials.new('Grey')
+grey.diffuse_color = (0.2,0.2,0.2)
+#color Dark Grey
+dgrey= bpy.data.materials.new('DGrey')
+dgrey.diffuse_color = (0.05,0.05,0.05)
+#Solar pannel material
+pannel = bpy.data.materials.new('Pannel')
+pannel.diffuse_color = (0,0,0.12)
+pannel.use_shadeless = True
+#Solar pannel Texture
+pTex=pannel.texture_slots.add()
+pTex.texture = vTex
+pTex.texture_coords = 'UV'
+pTex.use_map_color_diffuse = True 
+pTex.color = (0,0,0)
+#basic laser material
+laserA = bpy.data.materials.new('LaserA')
+laserA.type = 'SURFACE'
+laserA.use_cast_approximate=False
+laserA.use_cast_buffer_shadows=False
+laserA.use_cast_shadows_only=False
+laserA.use_only_shadow=False
+laserA.use_ray_shadow_bias=False
+laserA.transparency_method='Z_TRANSPARENCY'
+laserA.alpha=0.5
+#focusing laser material
+laserfA = bpy.data.materials.new('LaserfA')
+laserfA.type = 'SURFACE'
+laserfA.use_cast_approximate=False
+laserfA.use_cast_buffer_shadows=False
+laserfA.use_cast_shadows_only=False
+laserfA.use_only_shadow=False
+laserfA.use_ray_shadow_bias=False
+laserfA.transparency_method='Z_TRANSPARENCY'
+laserfA.alpha=0.5
+#basic laser material
+laserB = bpy.data.materials.new('LaserB')
+laserB.type = 'SURFACE'
+laserB.use_cast_approximate=False
+laserB.use_cast_buffer_shadows=False
+laserB.use_cast_shadows_only=False
+laserB.use_only_shadow=False
+laserB.use_ray_shadow_bias=False
+laserB.transparency_method='Z_TRANSPARENCY'
+laserB.alpha=0.5
+#focusing laser material
+laserfB = bpy.data.materials.new('LaserfB')
+laserfB.type = 'SURFACE'
+laserfB.use_cast_approximate=False
+laserfB.use_cast_buffer_shadows=False
+laserfB.use_cast_shadows_only=False
+laserfB.use_only_shadow=False
+laserfB.use_ray_shadow_bias=False
+laserfB.transparency_method='Z_TRANSPARENCY'
+laserfB.alpha=0.5
+#basic laser material
+laserC = bpy.data.materials.new('LaserC')
+laserC.type = 'SURFACE'
+laserC.use_cast_approximate=False
+laserC.use_cast_buffer_shadows=False
+laserC.use_cast_shadows_only=False
+laserC.use_only_shadow=False
+laserC.use_ray_shadow_bias=False
+laserC.transparency_method='Z_TRANSPARENCY'
+laserC.alpha=0.5
+#focusing laser material
+laserfC = bpy.data.materials.new('LaserfC')
+laserfC.type = 'SURFACE'
+laserfC.use_cast_approximate=False
+laserfC.use_cast_buffer_shadows=False
+laserfC.use_cast_shadows_only=False
+laserfC.use_only_shadow=False
+laserfC.use_ray_shadow_bias=False
+laserfC.transparency_method='Z_TRANSPARENCY'
+laserfC.alpha=0.5
+#---------------------------------------------------------------- 
+
+
+#---Build a Satellite-------------------------------------------- 
+def new_Sat_add(scale):
+    bpy.ops.object.select_all(action='DESELECT')
+    group_name = GN.pop()
+    group = bpy.data.groups.new(group_name)
+    #Section to construct sensors volume
+    bpy.ops.mesh.primitive_torus_add(
+        major_radius=5.3, 
+        minor_radius=1, 
+        major_segments=6, 
+        minor_segments=12, 
+        use_abso=False, 
+        abso_major_rad=1.0, 
+        abso_minor_rad=0.5, 
+        view_align=False, 
+        location=(0.0, 0.0, 1), 
+        rotation=(0.0, 0.0, 0.0))
+    bpy.context.object.data.materials.append(green)
+    bpy.ops.object.group_link(group=group_name)
+    #Section to construct sensors/cameras
+#    for x in range(0, 6):
+#        y=math.cos(math.pi*x/3)*5
+#        z=math.sin(math.pi*x/3)*5
+#        bpy.ops.mesh.primitive_cone_add(
+#            vertices=64, 
+#            depth=2.0,
+#            location=(y,z,.1), 
+#            rotation=(0.0, 0.0, 0.0))
+#        bpy.context.object.data.materials.append(dgrey)
+#        bpy.ops.object.group_link(group=group_name)
+#        bpy.ops.mesh.primitive_cube_add(
+#            location=(y,z,1),
+#            rotation=(0.0, 0.0, 0.0))
+#        bpy.context.object.data.materials.append(green)
+#        bpy.ops.object.group_link(group=group_name)
+    bpy.ops.mesh.primitive_cylinder_add(
+        vertices=64, 
+        radius=5,
+        depth=0.1, 
+        location=(0.0, 0.0, -0.5))
+    bpy.context.object.data.materials.append(grey)
+    bpy.ops.object.group_link(group=group_name)
+    #Section to construct the satellite body
+    bpy.ops.mesh.primitive_cone_add(
+        vertices=64, 
+        radius1=5,
+        radius2=3, 
+        depth=4, 
+        location=(0.0, 0.0, 2), 
+        rotation=(0.0, 0.0, 0.0))
+    bpy.context.object.data.materials.append(blue)
+    bpy.ops.object.select_same_group(group=group_name)
+    bpy.ops.object.join()
+    bpy.context.active_object.scale=(scale,scale,scale)
+#---------------------------------------------------------------- 
+
+#---Build the Focused Laser from the Sat------------------------- 
+def MakeFLO(name):
+    depthFL=R/1.4
+    bpy.ops.mesh.primitive_cone_add(
+        vertices=32, 
+        radius1=s*1.7, 
+        radius2=0, 
+        depth=depthFL)
+    FLO=bpy.context.active_object
+    scn = bpy.context.scene
+    scn.cursor_location = (0,0,0-depthFL/2)
+    bpy.ops.object.origin_set(type="ORIGIN_CURSOR")
+    FLO.name = str(name)
+    FLO.data.materials.append(laserfA)
+    return FLO
+def MakeLO(name,Lenth):
+    bpy.ops.mesh.primitive_cylinder_add(
+        vertices=32, 
+        radius=s*1.7, 
+        depth=Lenth)
+    bpy.context.active_object.name=name
+    bpy.context.object.data.materials.append(laserA)
+    bpy.context.scene.cursor_location = (0,0,0-Lenth/2)
+    bpy.ops.object.origin_set(type="ORIGIN_CURSOR")
+    ray=bpy.context.active_object
+    return ray
+
+#---------------------------------------------------------------- 
+
+bpy.context.scene.cursor_location = (0,0,0)
+
+#---Initialization of Asteroid/Comet----------------------------- 
+bpy.ops.mesh.primitive_cube_add()
+bpy.context.object.data.materials.append(dgrey)
+#Changes name of Cube to PolySphere
+bpy.context.active_object.name = "PolySphere"
+#Positions PolySphere to scene centre
+bpy.context.active_object.location = [0, 0, 0]
+#Adds Subsurf Modifier
+bpy.ops.object.modifier_add(type='SUBSURF')
+#Selects Subsurf Modifier for editing
+bpy.context.object.modifiers['Subsurf'].levels = 4
+#Applys Subsurf Modifier
+bpy.ops.object.modifier_apply(apply_as='DATA', 
+    modifier="Subsurf")
+
+#Adds a Displacement Modifier
+bpy.ops.object.modifier_add(type='DISPLACE')
+bpy.context.object.modifiers['Displace'].name = 'DISPLACEMENT'
+modd = bpy.context.object.modifiers['DISPLACEMENT']
+modd.texture = bpy.data.textures['CloudText']
+bpy.context.object.modifiers['DISPLACEMENT'].strength = 0.9
+
+#Adds smooth shading
+bpy.ops.object.shade_smooth()
+#Change to Objectmode
+#bpy.ops.object.editmode_toggle()
+
+bpy.context.active_object.data.materials.append(
+bpy.data.materials[0])
+#----------------------------------------------------------------
+n=int(n/3)       #Our 3 dimensions result in 3 orbital planes
+R=R*PlanetRadius
+c=1             #count frames
+ob=1            #object number
+na=2*math.pi/n  #angle between objects (based on number of sats)
+an=(math.pi/(4*time)) #angle numerating rate per frame
+fromTo=range(0,n) #n+1
+#---Ray creation-------------------------------------------------
+Lnth=math.sqrt(Dst*Dst*3)+R/1.5
+rayA=MakeLO("LaserA",Lnth)
+bpy.context.scene.cursor_location = (0,0,0)
+rayB=MakeLO("LaserB",Lnth)
+bpy.context.scene.cursor_location = (0,0,0)
+rayC=MakeLO("LaserC",Lnth)
+
+bpy.context.scene.cursor_location = (0,0,0)
+frayA=MakeFLO("FlaserA")
+bpy.context.scene.cursor_location = (0,0,0)
+frayB=MakeFLO("FlaserB")
+bpy.context.scene.cursor_location = (0,0,0)
+frayC=MakeFLO("FlaserC")
+
+bpy.context.scene.cursor_location = (0,0,0)
+
+#---Initialization of Satilites cloned---------------------------
+for ob in fromTo:
+    new_Sat_add(s)              #make       #size set
+    CrntOb = bpy.context.active_object
+    CrntOb.rotation_euler.x=math.pi*.75
+    CrntOb.rotation_euler.z=0-math.pi*.10
+    for c in frame_range: 
+        #Set new values for the object every keyframe
+        bpy.context.scene.frame_set(frame = c)
+        x=0                                     #new X position
+        y=R*(math.sin(c*an+na*ob))       #new Y position
+        z=R*(math.cos(c*an+na*ob))       #new Z position  
+        CrntOb.location = [x,y,z]
+        CrntOb.keyframe_insert(
+            data_path='location',
+            group="location")
+        nF = (na/an)
+        nF = int((c+101)%nF)
+        y=R*(math.sin(nF*an+na*3.25))
+        z=R*(math.cos(nF*an+na*3.25))
+        frayA.rotation_euler.x=math.pi-(nF*an+na*3.25)
+        frayA.rotation_euler.y=0
+        frayA.rotation_euler.z=0
+        frayA.location = [x,y,z]
+        frayA.keyframe_insert(
+            data_path='location',
+            group="LocRot")
+        frayA.keyframe_insert(
+            data_path='rotation_euler',
+            group="LocRot") 
+        #rayA.rotation_euler.x=.95
+        #rayA.rotation_euler.y=0
+        #rayA.rotation_euler.z=3.1*math.pi/4
+        rayA.location = [x,y,z]
+        rayA.keyframe_insert(
+            data_path='location',
+            group="LocRot")
+        rayA.keyframe_insert(
+            data_path='rotation_euler',
+            group="LocRot") 
+    new_Sat_add(s)            #make       #size set
+    bpy.context.active_object.rotation_euler.x=math.pi*.60
+    bpy.context.active_object.rotation_euler.z=0-math.pi*.25
+    for c in frame_range: 
+        #Set new values for the object every keyframe
+        bpy.context.scene.frame_set(frame = c)
+        x=R*(math.cos(an*c+na*ob+na/3))       #new X position
+        y=-R*(math.sin(c*an+na*ob+na/3))      #new Y position
+        z=0                                     #new Z position  
+        bpy.context.active_object.location = [x,y,z]
+        bpy.context.active_object.keyframe_insert(
+        data_path='location',
+        group="location")
+        nF = (na/an)
+        nF = int((c+78)%nF)
+        y=R*(math.sin(na*4.25-nF*an))
+        x=R*(math.cos(na*4.25-nF*an))
+        frayB.rotation_euler.x=0
+        frayB.rotation_euler.y=3*math.pi/2
+        frayB.rotation_euler.z=(na*4.25-nF*an)
+        frayB.location = [x,y,z]
+        frayB.keyframe_insert(
+            data_path='location',
+            group="LocRot")
+        frayB.keyframe_insert(
+            data_path='rotation_euler',
+            group="LocRot") 
+        #rayB.rotation_euler.x=.96
+        #rayB.rotation_euler.y=0
+        #rayB.rotation_euler.z=3*math.pi/4
+        rayB.location = [x,y,z]
+        rayB.keyframe_insert(
+            data_path='location',
+            group="LocRot")
+        rayB.keyframe_insert(
+            data_path='rotation_euler',
+            group="LocRot") 
+    new_Sat_add(s)             #make
+    bpy.context.active_object.rotation_euler.x=math.pi*.75
+    bpy.context.active_object.rotation_euler.z=0-math.pi*.30
+    for c in frame_range: 
+        #Set new values for the object every keyframe
+        bpy.context.scene.frame_set(frame = c)
+        x=R*(math.cos(an*c+na*ob+2*na/3))       #new X position
+        y=0                                     #new Y position
+        z=R*(math.sin(c*an+na*ob+2*na/3))      #new Z position  
+        bpy.context.active_object.location = [x,y,z]
+        bpy.context.active_object.keyframe_insert(
+        data_path='location',
+        group="location")   
+        nF = (na/an)
+        nF = int((c+55)%nF)
+        z=R*(math.sin(nF*an+na*3.25))
+        x=R*(math.cos(nF*an+na*3.25))
+        frayC.rotation_euler.x=0
+        frayC.rotation_euler.y=3*math.pi/2-(nF*an+na*3.25)
+        frayC.rotation_euler.z=0
+        frayC.location = [x,y,z]
+        frayC.keyframe_insert(
+            data_path='location',
+            group="LocRot")
+        frayC.keyframe_insert(
+            data_path='rotation_euler',
+            group="LocRot") 
+        #rayC.rotation_euler.x=.94
+        #rayC.rotation_euler.y=0
+        #rayC.rotation_euler.z=3*math.pi/4
+        rayC.location = [x,y,z]
+        rayC.keyframe_insert(
+            data_path='location',
+            group="LocRot")
+        rayC.keyframe_insert(
+            data_path='rotation_euler',
+            group="LocRot") 
+            
+#---------------------------------------------------------------- 
+#The orbit lines (circles)
+bpy.ops.mesh.primitive_circle_add(
+    vertices=128, #32
+    radius=R,
+    location=(0,0,0))
+bpy.context.object.data.materials.append(line)
+
+nrot=((math.pi/2, -0.0, 0.0))
+bpy.context.scene.objects.active.rotation_euler=nrot
+
+bpy.ops.mesh.primitive_circle_add(
+    vertices=128, #32
+    radius= R,
+    location=(0,0,0))
+bpy.context.object.data.materials.append(line)
+    
+nrot=((0, math.pi/2, 0))
+bpy.context.scene.objects.active.rotation_euler=nrot
+
+bpy.ops.mesh.primitive_circle_add(
+    vertices=128, #32
+    radius= R,
+    location=(0,0,0))
+bpy.context.object.data.materials.append(line)
+
+bpy.ops.mesh.primitive_cylinder_add(
+    vertices=2, 
+    radius=0, 
+    depth=Dst*3,
+    location=((Dst/2),(Dst/2),(Dst/2)))
+nrot=(0.955, 0, 3*math.pi/4)
+bpy.context.scene.objects.active.rotation_euler=nrot
+bpy.context.object.data.materials.append(line)
+    
+#---Initialization of Mother-Ship--------------------------------  
+
+bpy.ops.object.select_all(action='DESELECT')
+group_name = GN.pop()
+group = bpy.data.groups.new(group_name)
+
+for x in range(0, 5):
+    bpy.ops.mesh.primitive_cube_add(
+        rotation=(0, 0.0, 0.0),
+        location=(0,x*4,0))
+    bpy.context.active_object.scale=(1,1,.01)
+    bpy.context.object.data.materials.append(pannel)
+    bpy.ops.object.group_link(group=group_name)
+    bpy.ops.mesh.primitive_cube_add(
+        rotation=(0, 0.0, 0.0),
+        location=(0,x*4+2,0))
+    bpy.context.active_object.scale=(1,1,.01)
+    bpy.context.object.data.materials.append(pannel)
+    bpy.ops.object.group_link(group=group_name)
+    
+bpy.ops.mesh.primitive_cube_add(
+    rotation=(0, 0.0, 0.0),
+    location=(0,9,0))
+bpy.context.object.data.materials.append(green)
+bpy.context.active_object.scale=(1.1,1,1)
+bpy.ops.object.group_link(group=group_name)
+    
+bpy.ops.mesh.primitive_cylinder_add(
+    rotation=(0, 0.0, 0.0),
+    location=(0,9,0-0.1))
+bpy.context.object.data.materials.append(grey)
+bpy.ops.object.group_link(group=group_name)
+
+bpy.ops.object.select_same_group(group=group_name)
+bpy.ops.object.join()
+
+
+bpy.context.active_object.scale=(0.2,0.2,0.2)
+
+nrot=(-(0.25)*math.pi, 0, -(0.25)*math.pi)
+bpy.context.scene.objects.active.rotation_euler=nrot
+
+bpy.context.active_object.location=[Dst,Dst,Dst] 
+
+#----------------------------------------------------------------
+D = 0
+c = 0
+#
+#na = int(math.pi/(an*6))
+#frame_range=range(start,end,na)
+#
+##---Ray calculation----------------------------------------------
+#for c in frame_range: 
+#    #Set new values for the object every keyframe
+#    bpy.context.scene.frame_set(frame = c)
+#    theta = c*math.pi/100
+#    phi   = c*math.pi/100
+#    omega = c*math.pi/100
+#    mx    = (hx+x)/2
+#    my    = (hy+y)/2
+#    mz    = (hz+z)/2
+#    fray.rotation_euler.x=theta
+#    fray.rotation_euler.y=phi
+#    fray.rotation_euler.z=omega
+#    fray.keyframe_insert(
+#        data_path='location',
+#        group="LocRot")
+#    fray.keyframe_insert(
+#        data_path='rotation_euler',
+#        group="LocRot") 
+#
+#
+#
+#
