@@ -13,3 +13,5 @@ Considering configurations of distributed craft orbiting a center of gravitation
 All formulas are only valid given “n” and “N” are integers and 0<nN. “N” is the total number of satellites, “a” is the acceleration provided by gravity, “R” is the radius of orbit, “t” is the current time and “n” is the current satellite.
 
 ![equation](http://LukeABurgess.com/formulas2.png)
+
+the patent for this concept is [US 9,038,957 B1](http://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/20150009357.pdf)
